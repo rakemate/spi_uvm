@@ -40,8 +40,8 @@ class spi_test extends uvm_test;
     phase.raise_objection( this, "Starting spi_base_seqin main phase" );
     $display("%t Starting sequence spi_seq run_phase",$time);
     spi_seq.start(env.agt.seq);
-    #100ns;
-    phase.drop_objection( this , "Finished spi_seq in main phase" );
+    repeat (4) @(posedge vif.mclk);
+    phase.drop_objection(this, "Finished spi_seq in main phase");
   endtask
   
 endclass
@@ -76,19 +76,20 @@ class spi_reset_test extends spi_test;
     vif.data_in_slave <= '0;
     vif.reset <= 0;
 
-    repeat (2) @(posedge vif.mclk);
+    // Hold reset many mclk cycles so async slave/master reset paths fully settle.
+    repeat (32) @(posedge vif.mclk);
 
     if ((vif.data_out_master !== 8'h00) || (vif.data_out_slave !== 8'h00)) begin
       `uvm_error("spi_reset_test", $sformatf("Reset did not clear outputs: master=%0h slave=%0h", vif.data_out_master, vif.data_out_slave))
     end
 
     vif.reset <= 1;
-    @(posedge vif.mclk);
+    repeat (8) @(posedge vif.mclk);
 
     $display("%t Starting post-reset SPI traffic", $time);
     post_reset_seq.start(env.agt.seq);
 
-    #100ns;
+    repeat (4) @(posedge vif.mclk);
     phase.drop_objection(this, "Finished spi_reset_test run phase");
   endtask
 

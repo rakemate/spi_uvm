@@ -34,18 +34,17 @@ class spi_scoreboard extends uvm_scoreboard;
   //Write function implemetation
   //---------------------------------------
   function void write(spi_seq_item trans);
-   // trans.print();
-    `uvm_info("APB_SCOREBOARD",$sformatf("------::RESULT:: ------"),UVM_LOW)
-    `uvm_info("",$sformatf("data_in_master:%0h data_in_slave:%0h",trans.data_in_master,trans.data_in_slave),UVM_LOW)
-    `uvm_info("",$sformatf("data_out_master:%0h data_out_slave:%0h",trans.data_out_master,trans.data_out_slave),UVM_LOW)
-      if(trans.data_in_master==trans.data_out_slave)
-         `uvm_info("APB_SCOREBOARD",$sformatf("------ ::DATA TRANSACTION FROM MASTER TO SLAVE SUCCESSFUL:: ------"),UVM_LOW)
-      else
-        `uvm_info("APB_SCOREBOARD",$sformatf("------ ::DATA TRANSACTION FROM MASTER TO SLAVE FAILED:: ------"),UVM_LOW)
-      if(trans.data_in_slave==trans.data_out_master)
-        `uvm_info("APB_SCOREBOARD",$sformatf("------ ::DATA TRANSACTION FROM SLAVE TO MASTER SUCCESSFUL:: ------"),UVM_LOW)
-      else
-        `uvm_info("APB_SCOREBOARD",$sformatf("------ ::DATA TRANSACTION FROM SLAVE TO MASTER FAILED::------"),UVM_LOW);
+    `uvm_info("SPI_SCOREBOARD", "------ RESULT ------", UVM_MEDIUM)
+    `uvm_info("SPI_SCOREBOARD", $sformatf("data_in_master:%0h data_in_slave:%0h", trans.data_in_master, trans.data_in_slave), UVM_MEDIUM)
+    `uvm_info("SPI_SCOREBOARD", $sformatf("data_out_master:%0h data_out_slave:%0h", trans.data_out_master, trans.data_out_slave), UVM_MEDIUM)
+    if (trans.data_in_master == trans.data_out_slave)
+      `uvm_info("SPI_SCOREBOARD", "MOSI path: master -> slave PASS", UVM_MEDIUM)
+    else
+      `uvm_error("SPI_SCOREBOARD", "MOSI path: master -> slave FAIL")
+    if (trans.data_in_slave == trans.data_out_master)
+      `uvm_info("SPI_SCOREBOARD", "MISO path: slave -> master PASS", UVM_MEDIUM)
+    else
+      `uvm_error("SPI_SCOREBOARD", "MISO path: slave -> master FAIL")
   endfunction 
         
 endclass

@@ -47,20 +47,14 @@ class spi_monitor extends uvm_monitor;
     forever begin
      spi_seq_item trans;
       trans=new();
-      wait(`MON_IF.load_master==1 && `MON_IF.load_slave==1);
-      fork
-        trans.data_in_master=`MON_IF.data_in_master;
-        trans.data_in_slave=`MON_IF.data_in_slave;
-      join
-      wait(`MON_IF.load_master==0 && `MON_IF.load_slave==0);
-       repeat(8) begin
-           @(posedge vif.MONITOR.mclk);
-        end
-      wait(`MON_IF.read_master==1 && `MON_IF.read_slave==1);
-      fork
-        trans.data_out_master=`MON_IF.data_out_master;
-        trans.data_out_slave=`MON_IF.data_out_slave;
-      join  
+      wait (`MON_IF.load_master == 1 && `MON_IF.load_slave == 1);
+      trans.data_in_master = `MON_IF.data_in_master;
+      trans.data_in_slave = `MON_IF.data_in_slave;
+      wait (`MON_IF.load_master == 0 && `MON_IF.load_slave == 0);
+      repeat (8) @(posedge vif.MONITOR.mclk);
+      wait (`MON_IF.read_master == 1 && `MON_IF.read_slave == 1);
+      trans.data_out_master = `MON_IF.data_out_master;
+      trans.data_out_slave = `MON_IF.data_out_slave;
       ap.write(trans);
       end
   endtask

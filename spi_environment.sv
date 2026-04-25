@@ -22,18 +22,16 @@ class spi_environment extends uvm_env;
   //Build phase
   //---------------------------------------
   function void build_phase(uvm_phase phase);
-    
     super.build_phase(phase);
-    
-    agt=spi_agent::type_id::create("agt", this);
-    scb=spi_scoreboard::type_id::create("scb", this);
+
+    if (!uvm_config_db#(virtual spi_interface)::get(this, "", "vif", vif)) begin
+      `uvm_error("build_phase", "Environment virtual interface failed")
+    end
+
+    agt = spi_agent::type_id::create("agt", this);
+    scb = spi_scoreboard::type_id::create("scb", this);
     uvm_config_db#(virtual spi_interface)::set(this, "agt", "vif", vif);
     uvm_config_db#(virtual spi_interface)::set(this, "scb", "vif", vif);
-    
-    if(! uvm_config_db#(virtual spi_interface)::get(this, "", "vif", vif)) 
-      begin
-        `uvm_error("build_phase","Environment virtual interface failed")
-      end
   endfunction
     
   //---------------------------------------
@@ -42,7 +40,7 @@ class spi_environment extends uvm_env;
   function void connect_phase(uvm_phase phase);
     super.connect_phase(phase);
     agt.mon.ap.connect(scb.mon_imp);
-    uvm_report_info("SPI_ENVIRONMENT", "connect_phase, Connected monitor to scoreboard");
+    `uvm_info("SPI_ENVIRONMENT", "monitor -> scoreboard connected", UVM_HIGH)
   endfunction
     
 endclass

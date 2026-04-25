@@ -34,19 +34,17 @@ class spi_agent extends uvm_agent;
   //---------------------------------------
   virtual function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    
-    seq=spi_sequencer::type_id::create("seq",this);
-    driv=spi_driver::type_id::create("driv",this);
-    mon=spi_monitor::type_id::create("mon",this);
+
+    if (!uvm_config_db#(virtual spi_interface)::get(this, "", "vif", vif)) begin
+      `uvm_error("build_phase", "agent virtual interface failed");
+    end
+
+    seq = spi_sequencer::type_id::create("seq", this);
+    driv = spi_driver::type_id::create("driv", this);
+    mon = spi_monitor::type_id::create("mon", this);
     uvm_config_db#(virtual spi_interface)::set(this, "seq", "vif", vif);
     uvm_config_db#(virtual spi_interface)::set(this, "driv", "vif", vif);
     uvm_config_db#(virtual spi_interface)::set(this, "mon", "vif", vif);
-    
-    if(!uvm_config_db#(virtual spi_interface)::get(this,"","vif",vif))
-      begin
-        `uvm_error("build_phase","agent virtual interface failed");
-      end
-    
   endfunction
   
   //---------------------------------------
@@ -55,7 +53,7 @@ class spi_agent extends uvm_agent;
   virtual function void connect_phase(uvm_phase phase);
     super.connect_phase(phase);
     driv.seq_item_port.connect(seq.seq_item_export);
-    uvm_report_info("SPI_AGENT", "connect_phase, Connected driver to sequencer");
+    `uvm_info("SPI_AGENT", "driver <-> sequencer connected", UVM_HIGH)
   endfunction
   
 endclass

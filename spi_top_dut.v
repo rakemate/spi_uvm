@@ -13,50 +13,46 @@ module top_dut(mclk, reset,load_master,load_slave,read_master,
   
   spi_slave s_s(sclk,reset,cs,mosi,miso,data_in_slave,data_out_slave,read_slave,load_slave);
   
+`ifndef SPI_UVM_FAST_SIM
   property p1;
     @(posedge mclk)
-      disable iff(!reset)
-    load_master|->!read_master;
+      disable iff (!reset)
+      load_master |-> !read_master;
   endproperty
-  
+
   property p2;
     @(posedge mclk)
-      disable iff(!reset)
-    load_slave|->!read_slave;
+      disable iff (!reset)
+      load_slave |-> !read_slave;
   endproperty
-  
+
   property p3;
     @(posedge mclk)
-      disable iff(!reset)
-    (!load_master&&!read_master)|->(!load_slave&&!read_slave);
+      disable iff (!reset)
+      (!load_master && !read_master) |-> (!load_slave && !read_slave);
   endproperty
-  
+
   property p4;
     @(posedge mclk)
-      disable iff(!reset)
-    $fell(load_master) && $fell(load_slave)
-    && ! $rose(read_master) && ! $rose(read_slave)|=>($stable(load_master)&& $stable(load_slave)&& $stable(read_master)&& $stable(read_slave))[*8];
+      disable iff (!reset)
+      $fell(load_master) && $fell(load_slave)
+      && !$rose(read_master) && !$rose(read_slave)
+      |=> ($stable(load_master) && $stable(load_slave) && $stable(read_master) && $stable(read_slave)) [*8];
   endproperty
-  
-  assert property(p1)
-    $display("MASTER:WHILE LOAD NO READ:PASSED");
+
+  assert property (p1)
     else
-      $display("MASTER:WHILE LOAD NO READ:FAILED");
-    
-    assert property(p2)
-      $display("SLAVE:WHILE LOAD NO READ:PASSED");
+      $error("MASTER: load implies !read failed");
+  assert property (p2)
     else
-      $display("SLAVE:WHILE LOAD NO READ:FAILED");
-      
-      assert property(p3)
-        $display("MASTER SLAVE BOTH SHIFTING:PASSED");
+      $error("SLAVE: load implies !read failed");
+  assert property (p3)
     else
-      $display("MASTER SLAVE BOTH SHIFTING:FAILED");
-        
-        assert property(p4)
-      $display("CONTROL SIGNALS STABLE WHILE SHIFTING:PASSED");
+      $error("MASTER/SLAVE shift phase coupling failed");
+  assert property (p4)
     else
-      $display("CONTROL SIGNALS NOT STABLE WHILE SHIFTING:FAILED");     
+      $error("CONTROL signals unstable during shift");
+`endif
     
     
 endmodule

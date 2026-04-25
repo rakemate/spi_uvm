@@ -1,18 +1,18 @@
+// SPI Top TB — compile with +define+SPI_UVM_FAST_SIM for quicker regressions (no SVAs, fewer seq items).
+// Add +define+SPI_UVM_WAVES to enable full VCD (slow).
 
-//SPI Top TB
-
- import uvm_pkg::*;
+import uvm_pkg::*;
 `include "uvm_macros.svh"
-`include "sequence_item.sv"
-`include "sequence.sv"
-`include "sequencer.sv"
-`include "driver.sv"
+`include "spi_sequence_item.sv"
+`include "spi_sequence.sv"
+`include "spi_sequencer.sv"
+`include "spi_driver.sv"
 `include "interface.sv"
-`include "monitor.sv"
-`include "agent.sv"
-`include "scoreboard.sv"
-`include "env.sv"
-`include "test.sv"
+`include "spi_monitor.sv"
+`include "spi_agent.sv"
+`include "spi_scoreboard.sv"
+`include "spi_environment.sv"
+`include "spi_test.sv"
 
 
 module top_tb;
@@ -49,11 +49,15 @@ module top_tb;
   
               intf.data_out_master,intf.data_out_slave);
   
-   initial begin 
-     uvm_config_db#(virtual spi_interface)::set(uvm_root::get(),"*","vif",intf);
-    //enable wave dump
-    $dumpfile("dump.vcd"); 
-    $dumpvars;
+  initial begin
+    uvm_config_db#(virtual spi_interface)::set(uvm_root::get(), "*", "vif", intf);
+`ifdef SPI_UVM_FAST_SIM
+    uvm_root::get().set_report_verbosity_level_hier(UVM_WARNING);
+`endif
+`ifdef SPI_UVM_WAVES
+    $dumpfile("dump.vcd");
+    $dumpvars(0, top_tb);
+`endif
   end
   
   //---------------------------------------
