@@ -94,3 +94,29 @@ class spi_reset_test extends spi_test;
   endtask
 
 endclass
+
+// Exercises master/slave handshake: simultaneous load, coupled shift window, dual read.
+// top_dut concurrent assertions (when not SPI_UVM_FAST_SIM) check control coupling;
+// scoreboard checks MOSI/MISO data exchange for each completed beat.
+class spi_handshake_test extends spi_test;
+
+  `uvm_component_utils(spi_handshake_test)
+
+  function new(string name, uvm_component parent);
+    super.new(name, parent);
+  endfunction
+
+  task run_phase(uvm_phase phase);
+    spi_handshake_sequence hseq;
+
+    phase.raise_objection(this, "spi_handshake_test run phase");
+
+    hseq = spi_handshake_sequence::type_id::create("hseq", this);
+    `uvm_info("spi_handshake_test", "Starting deterministic master/slave handshake sequence", UVM_MEDIUM)
+    hseq.start(env.agt.seq);
+
+    repeat (4) @(posedge vif.mclk);
+    phase.drop_objection(this, "spi_handshake_test finished");
+  endtask
+
+endclass
